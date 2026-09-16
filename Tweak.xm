@@ -150,6 +150,10 @@ static BOOL UYouIsEnabled(NSString *key) {
 }
 %end
 
+%end // gMain
+
+%group gPlayer
+
 %hook YTPageStyleController
 + (void)updatePageStyles { %orig; }
 %end
@@ -178,6 +182,10 @@ static BOOL UYouIsEnabled(NSString *key) {
     );
 }
 %end
+
+%end // gPlayer
+
+%group gMain2
 
 %hook YTAppDelegate
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options {
@@ -293,8 +301,10 @@ static BOOL UYouIsEnabled(NSString *key) {
 }
 %end
 
-%end // gMain
+%end // gMain2
 
 %ctor {
     %init(gMain);
+    %init(gPlayer);
+    %init(gMain2);
 }
