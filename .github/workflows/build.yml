@@ -34,77 +34,124 @@ jobs:
           path: uYou
 
       - name: Install dependencies
-        run: brew install make ldid
+        run: |
+          brew install make ldid
 
       - name: Set PATH environment variables
         run: |
-          echo "$(brew --prefix make)/libexec/gnubin" >> $GITHUB_PATH
-          echo "THEOS=${{ github.workspace }}/theos" >> $GITHUB_ENV
+          echo "$(brew --prefix make)/libexec/gnubin" >> "$GITHUB_PATH"
+          echo "THEOS=${{ github.workspace }}/theos" >> "$GITHUB_ENV"
+          echo "ROOTHIDE_THEOS=${{ github.workspace }}/roothide-theos" >> "$GITHUB_ENV"
 
-      - name: Get Theos commit
+      - name: Get Theos commits
         run: |
           get_commit_hash() {
-            local repo_url=$1
+            local repo_url="$1"
             git ls-remote "$repo_url" HEAD | awk '{print substr($1,1,7)}'
           }
-          echo "THEOS_COMMIT=$(get_commit_hash "https://github.com/theos/theos")" >> $GITHUB_ENV
+
+          echo "THEOS_COMMIT=$(get_commit_hash "https://github.com/theos/theos")" >> "$GITHUB_ENV"
+          echo "ROOTHIDE_THEOS_COMMIT=$(get_commit_hash "https://github.com/roothide/theos")" >> "$GITHUB_ENV"
 
       - name: Cache Theos
         id: cache-theos
         uses: actions/cache@v6
         with:
           path: theos
-          key: uYou-18.6-SDK-${{ env.THEOS_COMMIT }}
+          key: uYou-${{ env.THEOS_COMMIT }}-SDK-18.6
+
+      - name: Cache RootHide Theos
+        id: cache-roothide-theos
+        uses: actions/cache@v6
+        with:
+          path: roothide-theos
+          key: uYou-roothide-theos-${{ env.ROOTHIDE_THEOS_COMMIT }}-SDK-18.6
 
       - name: Setup Theos
         if: ${{ steps.cache-theos.outputs.cache-hit != 'true' }}
         run: |
-          git clone --quiet --depth=1 --recurse-submodules https://github.com/theos/theos.git ${{ github.workspace }}/theos
-          git clone --quiet --depth=1 -n --filter=tree:0 https://github.com/aricloverEXTRA/sdks.git
-          cd sdks
+          git clone --quiet --depth=1 --recurse-submodules https://github.com/theos/theos.git "$THEOS"
+
+      - name: Setup RootHide Theos
+        if: ${{ steps.cache-roothide-theos.outputs.cache-hit != 'true' }}
+        run: |
+          git clone --quiet --depth=1 --recurse-submodules https://github.com/roothide/theos.git "$ROOTHIDE_THEOS"
+
+      - name: Install SDK into Theos
+        if: ${{ steps.cache-theos.outputs.cache-hit != 'true' }}
+        run: |
+          git clone --quiet --depth=1 -n --filter=tree:0 https://github.com/aricloverEXTRA/sdks.git "$RUNNER_TEMP/sdks-official"
+          cd "$RUNNER_TEMP/sdks-official"
           git sparse-checkout set --no-cone iPhoneOS18.6.sdk
           git checkout --quiet
+          mkdir -p "$THEOS/sdks"
           mv *.sdk "$THEOS/sdks"
+
+      - name: Install SDK into RootHide Theos
+        if: ${{ steps.cache-roothide-theos.outputs.cache-hit != 'true' }}
+        run: |
+          git clone --quiet --depth=1 -n --filter=tree:0 https://github.com/aricloverEXTRA/sdks.git "$RUNNER_TEMP/sdks-roothide"
+          cd "$RUNNER_TEMP/sdks-roothide"
+          git sparse-checkout set --no-cone iPhoneOS18.6.sdk
+          git checkout --quiet
+          mkdir -p "$ROOTHIDE_THEOS/sdks"
+          mv *.sdk "$ROOTHIDE_THEOS/sdks"
 
       - name: Clone headers
         run: |
           if [ ! -d "$THEOS/include/YouTubeHeader" ]; then
             git clone --quiet --depth=1 https://github.com/PoomSmart/YouTubeHeader.git "$THEOS/include/YouTubeHeader"
           else
-            cd $THEOS/include/YouTubeHeader
+            cd "$THEOS/include/YouTubeHeader"
             git pull --quiet --force
-            cd ${{ github.workspace }}
+            cd "$GITHUB_WORKSPACE"
           fi
 
           if [ ! -d "$THEOS/include/PSHeader" ]; then
             git clone --quiet --depth=1 https://github.com/PoomSmart/PSHeader.git "$THEOS/include/PSHeader"
           else
-            cd $THEOS/include/PSHeader
+            cd "$THEOS/include/PSHeader"
             git pull --quiet --force
-            cd ${{ github.workspace }}
+            cd "$GITHUB_WORKSPACE"
           fi
 
+      - name: Link headers into RootHide Theos
+        run: |
+          mkdir -p "$ROOTHIDE_THEOS/include"
+          rm -rf "$ROOTHIDE_THEOS/include/YouTubeHeader"
+          rm -rf "$ROOTHIDE_THEOS/include/PSHeader"
+          ln -s "$THEOS/include/YouTubeHeader" "$ROOTHIDE_THEOS/include/YouTubeHeader"
+          ln -s "$THEOS/include/PSHeader" "$ROOTHIDE_THEOS/include/PSHeader"
+
       - name: Fix Theos broken pipe issue
-        run: sed -i '' 's/od -c "$i" | head/od -c "$i" 2>\/dev\/null | head/g' $THEOS/bin/convert_xml_plist.sh || true
+        run: |
+          sed -i '' 's/od -c "$i" | head/od -c "$i" 2>\/dev\/null | head/g' "$THEOS/bin/convert_xml_plist.sh" || true
+          sed -i '' 's/od -c "$i" | head/od -c "$i" 2>\/dev\/null | head/g' "$ROOTHIDE_THEOS/bin/convert_xml_plist.sh" || true
 
       - name: Build uYou (rootless)
+        env:
+          THEOS: ${{ github.workspace }}/theos
         run: |
           cd uYou
-          echo "UYOU_VERSION=$(grep '^Version:' control | cut -d ' ' -f2)" >> $GITHUB_ENV
+          echo "UYOU_VERSION=$(grep '^Version:' control | cut -d ' ' -f2)" >> "$GITHUB_ENV"
           make clean package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
-          mv packages/*.deb ${{ github.workspace }}
+          mv packages/*.deb "$GITHUB_WORKSPACE"
 
       - name: Build uYou (roothide)
+        env:
+          THEOS: ${{ github.workspace }}/roothide-theos
         run: |
           cd uYou
           make clean package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=roothide
-          mv packages/*.deb ${{ github.workspace }}
+          mv packages/*.deb "$GITHUB_WORKSPACE"
 
       - name: Build uYou (legacy)
+        env:
+          THEOS: ${{ github.workspace }}/theos
         run: |
           cd uYou
           make clean package DEBUG=0 FINALPACKAGE=1
-          mv packages/*.deb ${{ github.workspace }}
+          mv packages/*.deb "$GITHUB_WORKSPACE"
 
       - name: Upload the tweak .deb(s)
         uses: actions/upload-artifact@v7
