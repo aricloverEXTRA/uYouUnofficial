@@ -3,12 +3,14 @@
 #import <HBLog.h>
 #import <rootless.h>
 #import <dlfcn.h>
+
 #import <YouTubeHeader/YTIPivotBarRenderer.h>
 #import <YouTubeHeader/YTIPivotBarSupportedRenderers.h>
 #import <YouTubeHeader/YTIPivotBarItemRenderer.h>
 #import <YouTubeHeader/YTCommonColorPalette.h>
 #import <YouTubeHeader/YTSettingsSectionItem.h>
 #import <YouTubeHeader/YTSettingsCell.h>
+
 #import "Classes/UI/ViewControllers/DownloadsPagerVC.h"
 #import "Classes/Core/Player/PlayerManager.h"
 #import "Classes/Core/Utils/Statistics.h"
@@ -23,17 +25,31 @@
 @class YTSettingsViewController;
 @class YTIPivotBarView;
 
+
 static BOOL UYouIsEnabled(NSString *key) {
     return [[NSUserDefaults standardUserDefaults] boolForKey:key];
 }
 
+
+/*
+ * ============================================================
+ * gMain
+ * ============================================================
+ */
+
 %group gMain
 
+
 %hook YTPivotBarView
+
 - (void)setRenderer:(YTIPivotBarRenderer *)renderer {
+
     if (renderer) {
+
         NSMutableArray *items = [renderer itemsArray];
+
         if (items) {
+
             NSDictionary *hideMap = @{
                 @"hideShortsTab": @"FEshorts",
                 @"hideCreateTab": @"FEuploads",
@@ -42,64 +58,182 @@ static BOOL UYouIsEnabled(NSString *key) {
                 @"hideLibraryTab": @"FElibrary",
                 @"hideTrendingTab": @"FEtrending"
             };
+
             for (NSString *key in hideMap) {
+
                 if (UYouIsEnabled(key)) {
+
                     NSString *pid = hideMap[key];
-                    NSUInteger idx = [items indexOfObjectPassingTest:^BOOL(YTIPivotBarSupportedRenderers *obj, NSUInteger idx, BOOL *stop) {
-                        NSString *a = [[obj pivotBarItemRenderer] pivotIdentifier];
-                        NSString *b = [[obj pivotBarIconOnlyItemRenderer] pivotIdentifier];
-                        return [a isEqualToString:pid] || [b isEqualToString:pid];
-                    }];
-                    if (idx != NSNotFound) [items removeObjectAtIndex:idx];
+
+                    NSUInteger idx =
+                        [items indexOfObjectPassingTest:
+                            ^BOOL(YTIPivotBarSupportedRenderers *obj,
+                                  NSUInteger idx,
+                                  BOOL *stop) {
+
+                                NSString *a =
+                                    [[obj pivotBarItemRenderer]
+                                        pivotIdentifier];
+
+                                NSString *b =
+                                    [[obj pivotBarIconOnlyItemRenderer]
+                                        pivotIdentifier];
+
+                                return [a isEqualToString:pid] ||
+                                       [b isEqualToString:pid];
+                            }];
+
+                    if (idx != NSNotFound) {
+                        [items removeObjectAtIndex:idx];
+                    }
                 }
             }
+
+
             if (!UYouIsEnabled(@"hideUYouTab")) {
+
                 BOOL alreadyHasUYou = NO;
+
                 for (YTIPivotBarSupportedRenderers *obj in items) {
-                    NSString *a = [[obj pivotBarItemRenderer] pivotIdentifier];
-                    NSString *b = [[obj pivotBarIconOnlyItemRenderer] pivotIdentifier];
-                    if ([a isEqualToString:@"com.miro.uyouunofficial"] || [b isEqualToString:@"com.miro.uyouunofficial"]) { alreadyHasUYou = YES; break; }
+
+                    NSString *a =
+                        [[obj pivotBarItemRenderer] pivotIdentifier];
+
+                    NSString *b =
+                        [[obj pivotBarIconOnlyItemRenderer]
+                            pivotIdentifier];
+
+                    if ([a isEqualToString:@"com.miro.uyouunofficial"] ||
+                        [b isEqualToString:@"com.miro.uyouunofficial"]) {
+
+                        alreadyHasUYou = YES;
+                        break;
+                    }
                 }
+
+
                 if (!alreadyHasUYou) {
-                    YTIPivotBarSupportedRenderers *uYouTab = [%c(YTIPivotBarRenderer) pivotSupportedRenderersWithBrowseId:@"com.miro.uyouunofficial" title:@"uYou" iconType:2];
-                    if (uYouTab) [items addObject:uYouTab];
+
+                    YTIPivotBarSupportedRenderers *uYouTab =
+                        [%c(YTIPivotBarRenderer)
+                            pivotSupportedRenderersWithBrowseId:
+                                @"com.miro.uyouunofficial"
+                            title:@"uYou"
+                            iconType:2];
+
+                    if (uYouTab) {
+                        [items addObject:uYouTab];
+                    }
                 }
             }
         }
     }
-    %orig(
-        renderer
-    );
+
+
+    %orig(renderer);
 }
+
 %end
 
+
 %hook YTSettingsViewController
-- (void)setSectionItems:(NSMutableArray *)sectionItems forCategory:(NSInteger)category title:(NSString *)title icon:(YTIIcon *)icon titleDescription:(NSString *)titleDescription headerHidden:(BOOL)headerHidden {
+
+- (void)setSectionItems:(NSMutableArray *)sectionItems
+           forCategory:(NSInteger)category
+                 title:(NSString *)title
+                  icon:(YTIIcon *)icon
+        titleDescription:(NSString *)titleDescription
+          headerHidden:(BOOL)headerHidden {
+
     NSMutableArray *origItems = sectionItems;
+
+
     if ((category == 1 || category == 4) && sectionItems) {
-        NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"uYouLocalization" ofType:@"bundle"];
-        NSBundle *locBundle = bundlePath ? [NSBundle bundleWithPath:bundlePath] : nil;
-        NSString *uYouTitle = locBundle ? [locBundle localizedStringForKey:@"uYouSettings" value:@"Show uYou settings" table:@"Localizable"] : @"Show uYou settings";
+
+        NSString *bundlePath =
+            [[NSBundle mainBundle]
+                pathForResource:@"uYouLocalization"
+                ofType:@"bundle"];
+
+        NSBundle *locBundle =
+            bundlePath
+                ? [NSBundle bundleWithPath:bundlePath]
+                : nil;
+
+
+        NSString *uYouTitle =
+            locBundle
+                ? [locBundle
+                    localizedStringForKey:@"uYouSettings"
+                                    value:@"Show uYou settings"
+                                    table:@"Localizable"]
+                : @"Show uYou settings";
+
+
         YTSettingsSectionItem *uYouItem = nil;
+
+
         if (category == 1) {
-            uYouItem = [%c(YTSettingsSectionItem) itemWithTitle:uYouTitle accessibilityIdentifier:nil detailTextBlock:nil selectBlock:^BOOL(id cell, NSUInteger arg1) {
-                UIViewController *vc = [[%c(SettingsVC) alloc] init];
-                if (vc) [(UINavigationController *)[(id)self navigationController] pushViewController:vc animated:YES];
-                return YES;
-            }];
+
+            uYouItem =
+                [%c(YTSettingsSectionItem)
+                    itemWithTitle:uYouTitle
+                    accessibilityIdentifier:nil
+                    detailTextBlock:nil
+                    selectBlock:^BOOL(id cell, NSUInteger arg1) {
+
+                        UIViewController *vc =
+                            [[%c(SettingsVC) alloc] init];
+
+                        if (vc) {
+
+                            [(UINavigationController *)
+                                [(id)self navigationController]
+                                    pushViewController:vc
+                                    animated:YES];
+                        }
+
+                        return YES;
+                    }];
+
         } else {
-            uYouItem = [%c(YTSettingsSectionItem) itemWithTitle:uYouTitle titleDescription:nil accessibilityIdentifier:nil detailTextBlock:nil selectBlock:^BOOL(id cell, NSUInteger arg1) {
-                UIViewController *vc = [[%c(SettingsVC) alloc] init];
-                if (vc) [(UINavigationController *)[(id)self navigationController] pushViewController:vc animated:YES];
-                return YES;
-            }];
+
+            uYouItem =
+                [%c(YTSettingsSectionItem)
+                    itemWithTitle:uYouTitle
+                    titleDescription:nil
+                    accessibilityIdentifier:nil
+                    detailTextBlock:nil
+                    selectBlock:^BOOL(id cell, NSUInteger arg1) {
+
+                        UIViewController *vc =
+                            [[%c(SettingsVC) alloc] init];
+
+                        if (vc) {
+
+                            [(UINavigationController *)
+                                [(id)self navigationController]
+                                    pushViewController:vc
+                                    animated:YES];
+                        }
+
+                        return YES;
+                    }];
         }
+
+
         if (uYouItem) {
-            NSMutableArray *newItems = [sectionItems mutableCopy];
+
+            NSMutableArray *newItems =
+                [sectionItems mutableCopy];
+
             [newItems addObject:uYouItem];
+
             origItems = newItems;
         }
     }
+
+
     %orig(
         origItems,
         category,
@@ -109,46 +243,111 @@ static BOOL UYouIsEnabled(NSString *key) {
         headerHidden
     );
 }
+
 %end
+
 
 %hook YTHeaderContentComboViewController
+
 - (void)viewDidLoad {
+
     %orig;
+
     @try {
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"hideUYouButton"]) {
-            UIView *rootView = [(UIViewController *)self view];
+
+        if ([[NSUserDefaults standardUserDefaults]
+                boolForKey:@"hideUYouButton"]) {
+
+            UIView *rootView =
+                [(UIViewController *)self view];
+
             if (rootView) {
+
                 for (UIView *v in rootView.subviews) {
-                    if ([v.accessibilityIdentifier containsString:@"uYou"] || [NSStringFromClass(v.class) containsString:@"uYou"]) v.hidden = YES;
+
+                    if ([v.accessibilityIdentifier
+                            containsString:@"uYou"] ||
+                        [NSStringFromClass(v.class)
+                            containsString:@"uYou"]) {
+
+                        v.hidden = YES;
+                    }
                 }
             }
         }
+
     } @catch (id e) {}
 }
+
 %end
+
 
 %hook YTRefactoredHeaderContentComboViewController
+
 - (void)viewDidLoad {
+
     %orig;
+
     @try {
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"hideUYouButton"]) {
-            UIView *rootView = [(UIViewController *)self view];
+
+        if ([[NSUserDefaults standardUserDefaults]
+                boolForKey:@"hideUYouButton"]) {
+
+            UIView *rootView =
+                [(UIViewController *)self view];
+
             if (rootView) {
+
                 for (UIView *v in rootView.subviews) {
-                    if ([v.accessibilityIdentifier containsString:@"uYou"] || [NSStringFromClass(v.class) containsString:@"uYou"]) v.hidden = YES;
+
+                    if ([v.accessibilityIdentifier
+                            containsString:@"uYou"] ||
+                        [NSStringFromClass(v.class)
+                            containsString:@"uYou"]) {
+
+                        v.hidden = YES;
+                    }
                 }
             }
         }
+
     } @catch (id e) {}
 }
+
 %end
 
+
 %hook YTAppViewController
+
 - (void)closeMiniPlayer {
-    @try { id pm = [%c(PlayerManager) sharedInstance]; if ([pm respondsToSelector:@selector(setSource:)]) [pm performSelector:@selector(setSource:) withObject:nil]; } @catch (id e) {}
+
+    @try {
+
+        id pm = [%c(PlayerManager) sharedInstance];
+
+        if ([pm respondsToSelector:@selector(setSource:)]) {
+
+            [pm performSelector:@selector(setSource:)
+                     withObject:nil];
+        }
+
+    } @catch (id e) {}
+
     %orig;
 }
+
 %end
+
+
+%end // gMain
+
+
+
+/*
+ * ============================================================
+ * gPlayer
+ * ============================================================
+ */
 
 %group gPlayer
 
@@ -163,6 +362,13 @@ static BOOL UYouIsEnabled(NSString *key) {
 %end // gPlayer
 
 
+
+/*
+ * ============================================================
+ * gPlayer2
+ * ============================================================
+ */
+
 %group gPlayer2
 
 %hook YTInlineMutedPlaybackWatchController
@@ -175,6 +381,13 @@ static BOOL UYouIsEnabled(NSString *key) {
 
 %end // gPlayer2
 
+
+
+/*
+ * ============================================================
+ * gPlayer3
+ * ============================================================
+ */
 
 %group gPlayer3
 
@@ -189,6 +402,13 @@ static BOOL UYouIsEnabled(NSString *key) {
 %end // gPlayer3
 
 
+
+/*
+ * ============================================================
+ * gPlayer4
+ * ============================================================
+ */
+
 %group gPlayer4
 
 %hook YTPlayerViewController
@@ -201,6 +421,13 @@ static BOOL UYouIsEnabled(NSString *key) {
 
 %end // gPlayer4
 
+
+
+/*
+ * ============================================================
+ * gPlayer5
+ * ============================================================
+ */
 
 %group gPlayer5
 
@@ -219,27 +446,46 @@ static BOOL UYouIsEnabled(NSString *key) {
 %end // gPlayer5
 
 
+
+/*
+ * ============================================================
+ * gMain2
+ * ============================================================
+ */
+
 %group gMain2
+
 
 %hook YTAppDelegate
 
 - (BOOL)application:(UIApplication *)application
     didFinishLaunchingWithOptions:(NSDictionary *)options {
 
-    BOOL r = %orig(application, options);
+    BOOL r =
+        %orig(
+            application,
+            options
+        );
+
 
     @try {
-        [[NSUserDefaults standardUserDefaults] setBool:YES
-                                               forKey:@"showedWelcomeVC"];
 
-        [[NSUserDefaults standardUserDefaults] setBool:NO
-                                               forKey:@"automaticallyCheckForUpdates"];
+        [[NSUserDefaults standardUserDefaults]
+            setBool:YES
+            forKey:@"showedWelcomeVC"];
+
+        [[NSUserDefaults standardUserDefaults]
+            setBool:NO
+            forKey:@"automaticallyCheckForUpdates"];
+
     } @catch (id e) {}
+
 
     return r;
 }
 
 %end
+
 
 
 %hook YTLocalPlaybackController
@@ -251,18 +497,24 @@ static BOOL UYouIsEnabled(NSString *key) {
 %end
 
 
+
 %hook Statistics
 
 + (void)update:(id)arg1 {
 
     %orig(arg1);
 
+
     @try {
-        [[%c(Statistics) sharedStatistics] recordDownloadStarted];
+
+        [[%c(Statistics) sharedStatistics]
+            recordDownloadStarted];
+
     } @catch (id e) {}
 }
 
 %end
+
 
 
 %hook UIViewController
@@ -270,31 +522,43 @@ static BOOL UYouIsEnabled(NSString *key) {
 - (UITraitCollection *)traitCollection {
 
     @try {
+
         return %orig;
+
     } @catch (NSException *e) {
+
         return [UITraitCollection currentTraitCollection];
     }
 }
+
 
 - (void)traitCollectionDidChange:(UITraitCollection *)prev {
 
     %orig(prev);
 
+
     @try {
+
         if (%c(DownloadsPagerVC)) {
-            void (*fn)(void) = (void (*)(void))dlsym(
-                RTLD_DEFAULT,
-                "UYouRefreshAppearance"
-            );
+
+            void (*fn)(void) =
+                (void (*)(void))
+                    dlsym(
+                        RTLD_DEFAULT,
+                        "UYouRefreshAppearance"
+                    );
+
 
             if (fn) {
                 fn();
             }
         }
+
     } @catch (id e) {}
 }
 
 %end
+
 
 
 %hook HAMPlayerInternal
@@ -302,15 +566,24 @@ static BOOL UYouIsEnabled(NSString *key) {
 - (void)play {
 
     @try {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [[%c(PlayerManager) sharedInstance] pause];
-        });
+
+        dispatch_async(
+            dispatch_get_main_queue(),
+            ^{
+
+                [[%c(PlayerManager) sharedInstance]
+                    pause];
+            }
+        );
+
     } @catch (id e) {}
+
 
     %orig;
 }
 
 %end
+
 
 
 %hook SSBouncyButton
@@ -324,29 +597,39 @@ static BOOL UYouIsEnabled(NSString *key) {
 %end
 
 
+
 %hook YTCommonColorPalette
 
 - (UIColor *)brandBackgroundSolid {
 
     BOOL dark = NO;
 
+
     if ([self respondsToSelector:@selector(pageStyle)]) {
+
         dark = (self.pageStyle == 1);
+
     } else {
+
         dark =
-            (UITraitCollection.currentTraitCollection.userInterfaceStyle
+            (UITraitCollection
+                .currentTraitCollection
+                .userInterfaceStyle
              == UIUserInterfaceStyleDark);
     }
 
+
     return dark
-        ? [UIColor colorWithRed:0.05882352941176471
-                          green:0.05882352941176471
-                           blue:0.05882352941176471
-                          alpha:1.0]
+        ? [UIColor
+            colorWithRed:0.05882352941176471
+            green:0.05882352941176471
+            blue:0.05882352941176471
+            alpha:1.0]
         : %orig;
 }
 
 %end
+
 
 
 %hook YTPlayerViewController
@@ -355,26 +638,38 @@ static BOOL UYouIsEnabled(NSString *key) {
 
     id c = %orig;
 
+
     if (!c &&
-        [(id)self respondsToSelector:@selector(overlayManager)]) {
+        [(id)self
+            respondsToSelector:@selector(overlayManager)]) {
 
         @try {
+
             id mgr =
-                [(id)self performSelector:@selector(overlayManager)];
+                [(id)self
+                    performSelector:@selector(overlayManager)];
+
 
             if (mgr &&
-                [mgr respondsToSelector:@selector(varispeedController)]) {
+                [mgr
+                    respondsToSelector:
+                        @selector(varispeedController)]) {
 
                 c =
-                    [mgr performSelector:@selector(varispeedController)];
+                    [mgr
+                        performSelector:
+                            @selector(varispeedController)];
             }
+
         } @catch (id e) {}
     }
+
 
     return c;
 }
 
 %end
+
 
 
 %hook GOODialogView
@@ -383,10 +678,12 @@ static BOOL UYouIsEnabled(NSString *key) {
 
     UIImageView *iv = %orig;
 
+
     @try {
 
         UILabel *lab =
             [(id)self valueForKey:@"titleLabel"];
+
 
         if (lab &&
             [lab.text containsString:@"uYou\n"]) {
@@ -396,15 +693,21 @@ static BOOL UYouIsEnabled(NSString *key) {
                     pathForResource:@"uYouUnofficial"
                     ofType:@"bundle"];
 
+
             if (!bp) {
+
                 bp =
                     [[NSBundle mainBundle]
                         pathForResource:@"uYouBundle"
                         ofType:@"bundle"];
             }
 
+
             NSBundle *b =
-                bp ? [NSBundle bundleWithPath:bp] : nil;
+                bp
+                    ? [NSBundle bundleWithPath:bp]
+                    : nil;
+
 
             if (b) {
 
@@ -412,12 +715,19 @@ static BOOL UYouIsEnabled(NSString *key) {
                     [b pathForResource:@"icon_clipped"
                                 ofType:@"png"];
 
+
                 UIImage *icon =
-                    ip ? [UIImage imageWithContentsOfFile:ip] : nil;
+                    ip
+                        ? [UIImage
+                            imageWithContentsOfFile:ip]
+                        : nil;
+
 
                 if (icon) {
 
-                    CGSize sz = CGSizeMake(30, 30);
+                    CGSize sz =
+                        CGSizeMake(30, 30);
+
 
                     UIGraphicsBeginImageContextWithOptions(
                         sz,
@@ -425,17 +735,23 @@ static BOOL UYouIsEnabled(NSString *key) {
                         0
                     );
 
-                    [icon drawInRect:CGRectMake(
-                        0,
-                        0,
-                        sz.width,
-                        sz.height
-                    )];
+
+                    [icon
+                        drawInRect:
+                            CGRectMake(
+                                0,
+                                0,
+                                sz.width,
+                                sz.height
+                            )];
+
 
                     UIImage *resized =
                         UIGraphicsGetImageFromCurrentImageContext();
 
+
                     UIGraphicsEndImageContext();
+
 
                     if (iv) {
                         [iv setImage:resized];
@@ -446,6 +762,7 @@ static BOOL UYouIsEnabled(NSString *key) {
 
     } @catch (id e) {}
 
+
     return iv;
 }
 
@@ -453,6 +770,7 @@ static BOOL UYouIsEnabled(NSString *key) {
 - (UILabel *)titleLabel {
 
     UILabel *lab = %orig;
+
 
     @try {
 
@@ -462,25 +780,44 @@ static BOOL UYouIsEnabled(NSString *key) {
 
             lab.text =
                 [lab.text
-                    stringByReplacingOccurrencesOfString:@"uYou\n"
-                                              withString:@"uYou\n\n"];
+                    stringByReplacingOccurrencesOfString:
+                        @"uYou\n"
+                    withString:
+                        @"uYou\n\n"];
         }
 
     } @catch (id e) {}
+
 
     return lab;
 }
 
 %end
 
+
 %end // gMain2
 
+
+
+/*
+ * ============================================================
+ * Constructor
+ * ============================================================
+ */
+
 %ctor {
+
     %init(gMain);
+
     %init(gPlayer);
+
     %init(gPlayer2);
+
     %init(gPlayer3);
+
     %init(gPlayer4);
+
     %init(gPlayer5);
+
     %init(gMain2);
 }
