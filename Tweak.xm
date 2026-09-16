@@ -157,9 +157,11 @@ static BOOL UYouIsEnabled(NSString *key) {
 %end
 
 %hook YTPlaybackConfig
-- (void)setStartPlayback:(id)arg1 { %orig(
-    arg1
-); }
+- (void)setStartPlayback:(id)arg1 {
+    %orig(
+        arg1
+    );
+}
 %end
 
 %hook YTPlayerViewController
@@ -168,17 +170,19 @@ static BOOL UYouIsEnabled(NSString *key) {
 
 %hook YTMainAppVideoPlayerOverlayViewController
 - (void)mediaTime { %orig; }
-- (void)setMediaTime:(id)arg1 { %orig(
-    arg1
-); }
+- (void)setMediaTime:(id)arg1 {
+    %orig(
+        arg1
+    );
+}
 %end
 
 %hook YTAppDelegate
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options {
     BOOL r = %orig(
-    application,
-    options
-);
+        application,
+        options
+    );
     @try {
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"showedWelcomeVC"];
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"automaticallyCheckForUpdates"];
@@ -194,8 +198,8 @@ static BOOL UYouIsEnabled(NSString *key) {
 %hook Statistics
 + (void)update:(id)arg1 { 
     %orig(
-    arg1
-); 
+        arg1
+    ); 
     @try { [[%c(Statistics) sharedStatistics] recordDownloadStarted]; } @catch (id e) {} 
 }
 %end
@@ -206,8 +210,8 @@ static BOOL UYouIsEnabled(NSString *key) {
 }
 - (void)traitCollectionDidChange:(UITraitCollection *)prev {
     %orig(
-    prev
-);
+        prev
+    );
     @try {
         if (%c(DownloadsPagerVC)) {
             void (*fn)(void) = (void (*)(void))dlsym(RTLD_DEFAULT, "UYouRefreshAppearance");
@@ -269,7 +273,7 @@ static BOOL UYouIsEnabled(NSString *key) {
                     [icon drawInRect:CGRectMake(0, 0, sz.width, sz.height)];
                     UIImage *resized = UIGraphicsGetImageFromCurrentImageContext();
                     UIGraphicsEndImageContext();
-                    [iv setImage:resized];
+                    if (iv) [iv setImage:resized];
                 }
             }
         }
@@ -279,10 +283,14 @@ static BOOL UYouIsEnabled(NSString *key) {
 - (UILabel *)titleLabel {
     UILabel *lab = %orig;
     @try {
-        if (lab && [lab.text containsString:@"uYou\n"]) {
-            lab.text = [lab.text stringByReplacingOccurrencesOfString:@"uYou\n" withString:@"uYou 3.0.6 (Unofficial)\n"];
+        if (lab && [lab.text containsString:@"uYou\n"] && ![lab.text containsString:@"uYou\n\n"]) {
+            lab.text = [lab.text stringByReplacingOccurrencesOfString:@"uYou\n" withString:@"uYou\n\n"];
         }
     } @catch (id e) {}
     return lab;
 }
 %end
+
+%ctor {
+    %init();
+}
