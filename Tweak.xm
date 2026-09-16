@@ -65,7 +65,9 @@ static BOOL UYouIsEnabled(NSString *key) {
             }
         }
     }
-    %orig(renderer);
+    %orig(
+        renderer
+    );
 }
 %end
 
@@ -96,7 +98,14 @@ static BOOL UYouIsEnabled(NSString *key) {
             origItems = newItems;
         }
     }
-    %orig(origItems, category, title, icon, titleDescription, headerHidden);
+    %orig(
+        origItems,
+        category,
+        title,
+        icon,
+        titleDescription,
+        headerHidden
+    );
 }
 %end
 
@@ -148,7 +157,9 @@ static BOOL UYouIsEnabled(NSString *key) {
 %end
 
 %hook YTPlaybackConfig
-- (void)setStartPlayback:(id)arg1 { %orig(arg1); }
+- (void)setStartPlayback:(id)arg1 { %orig(
+        arg1
+    ); }
 %end
 
 %hook YTPlayerViewController
@@ -157,12 +168,17 @@ static BOOL UYouIsEnabled(NSString *key) {
 
 %hook YTMainAppVideoPlayerOverlayViewController
 - (void)mediaTime { %orig; }
-- (void)setMediaTime:(id)arg1 { %orig(arg1); }
+- (void)setMediaTime:(id)arg1 { %orig(
+        arg1
+    ); }
 %end
 
 %hook YTAppDelegate
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options {
-    BOOL r = %orig(application, options);
+    BOOL r = %orig(
+        application,
+        options
+    );
     @try {
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"showedWelcomeVC"];
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"automaticallyCheckForUpdates"];
@@ -177,7 +193,9 @@ static BOOL UYouIsEnabled(NSString *key) {
 
 %hook Statistics
 + (void)update:(id)arg1 { 
-    %orig(arg1); 
+    %orig(
+        arg1
+    ); 
     @try { [[%c(Statistics) sharedStatistics] recordDownloadStarted]; } @catch (id e) {} 
 }
 %end
@@ -187,7 +205,9 @@ static BOOL UYouIsEnabled(NSString *key) {
     @try { return %orig; } @catch (NSException *e) { return [UITraitCollection currentTraitCollection]; }
 }
 - (void)traitCollectionDidChange:(UITraitCollection *)prev {
-    %orig(prev);
+    %orig(
+        prev
+    );
     @try {
         if (%c(DownloadsPagerVC)) {
             void (*fn)(void) = (void (*)(void))dlsym(RTLD_DEFAULT, "UYouRefreshAppearance");
