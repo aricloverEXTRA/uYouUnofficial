@@ -27,6 +27,8 @@ static BOOL UYouIsEnabled(NSString *key) {
     return [[NSUserDefaults standardUserDefaults] boolForKey:key];
 }
 
+%group gMain
+
 %hook YTPivotBarView
 - (void)setRenderer:(YTIPivotBarRenderer *)renderer {
     if (renderer) {
@@ -291,6 +293,8 @@ static BOOL UYouIsEnabled(NSString *key) {
 }
 %end
 
+%end // gMain
+
 %ctor {
-    %init();
+    %init(gMain);
 }
