@@ -155,12 +155,24 @@ static BOOL UYouIsEnabled(NSString *key) {
 %group gPlayer
 
 %hook YTPageStyleController
-+ (void)updatePageStyles { %orig; }
++ (void)updatePageStyles {
+    %orig;
+}
 %end
 
+%end // gPlayer
+
+%group gPlayer2
+
 %hook YTInlineMutedPlaybackWatchController
-- (void)startPlayback { %orig; }
+- (void)startPlayback {
+    %orig;
+}
 %end
+
+%end // gPlayer2
+
+%group gPlayer3
 
 %hook YTPlaybackConfig
 - (void)setStartPlayback:(id)arg1 {
@@ -170,18 +182,34 @@ static BOOL UYouIsEnabled(NSString *key) {
 }
 %end
 
+%end // gPlayer3
+
+%group gPlayer4
+
 %hook YTPlayerViewController
-- (void)updatePlayerViewWithActivePlayerOverlay { %orig; }
+- (void)updatePlayerViewWithActivePlayerOverlay {
+    %orig;
+}
 %end
 
+%end // gPlayer4
+
+%group gPlayer5
+
 %hook YTMainAppVideoPlayerOverlayViewController
-- (void)mediaTime { %orig; }
+- (void)mediaTime {
+    %orig;
+}
 - (void)setMediaTime:(id)arg1 {
     %orig(
         arg1
     );
 }
 %end
+
+%end // gPlayer5
+
+%group gMain2
 
 %end // gPlayer
 
@@ -306,5 +334,9 @@ static BOOL UYouIsEnabled(NSString *key) {
 %ctor {
     %init(gMain);
     %init(gPlayer);
+    %init(gPlayer2);
+    %init(gPlayer3);
+    %init(gPlayer4);
+    %init(gPlayer5);
     %init(gMain2);
 }
