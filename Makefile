@@ -1,4 +1,4 @@
-TARGET = iphone:clang:18.6:14.0
+TARGET = iphone:clang:18.6:15.0
 ARCHS = arm64 arm64e
 INSTALL_TARGET_PROCESSES = YouTube
 
