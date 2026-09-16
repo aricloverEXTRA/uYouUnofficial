@@ -65,9 +65,7 @@ static BOOL UYouIsEnabled(NSString *key) {
             }
         }
     }
-    %orig(
-        renderer
-    );
+    %orig(renderer);
 }
 %end
 
@@ -98,14 +96,7 @@ static BOOL UYouIsEnabled(NSString *key) {
             origItems = newItems;
         }
     }
-    %orig(
-        origItems,
-        category,
-        title,
-        icon,
-        titleDescription,
-        headerHidden
-    );
+    %orig(origItems, category, title, icon, titleDescription, headerHidden);
 }
 %end
 
@@ -115,8 +106,10 @@ static BOOL UYouIsEnabled(NSString *key) {
     @try {
         if ([[NSUserDefaults standardUserDefaults] boolForKey:@"hideUYouButton"]) {
             UIView *rootView = [(UIViewController *)self view];
-            for (UIView *v in rootView.subviews) {
-                if ([v.accessibilityIdentifier containsString:@"uYou"] || [NSStringFromClass(v.class) containsString:@"uYou"]) v.hidden = YES;
+            if (rootView) {
+                for (UIView *v in rootView.subviews) {
+                    if ([v.accessibilityIdentifier containsString:@"uYou"] || [NSStringFromClass(v.class) containsString:@"uYou"]) v.hidden = YES;
+                }
             }
         }
     } @catch (id e) {}
@@ -129,8 +122,10 @@ static BOOL UYouIsEnabled(NSString *key) {
     @try {
         if ([[NSUserDefaults standardUserDefaults] boolForKey:@"hideUYouButton"]) {
             UIView *rootView = [(UIViewController *)self view];
-            for (UIView *v in rootView.subviews) {
-                if ([v.accessibilityIdentifier containsString:@"uYou"] || [NSStringFromClass(v.class) containsString:@"uYou"]) v.hidden = YES;
+            if (rootView) {
+                for (UIView *v in rootView.subviews) {
+                    if ([v.accessibilityIdentifier containsString:@"uYou"] || [NSStringFromClass(v.class) containsString:@"uYou"]) v.hidden = YES;
+                }
             }
         }
     } @catch (id e) {}
@@ -153,9 +148,7 @@ static BOOL UYouIsEnabled(NSString *key) {
 %end
 
 %hook YTPlaybackConfig
-- (void)setStartPlayback:(id)arg1 { %orig(
-        arg1
-    ); }
+- (void)setStartPlayback:(id)arg1 { %orig(arg1); }
 %end
 
 %hook YTPlayerViewController
@@ -164,17 +157,12 @@ static BOOL UYouIsEnabled(NSString *key) {
 
 %hook YTMainAppVideoPlayerOverlayViewController
 - (void)mediaTime { %orig; }
-- (void)setMediaTime:(id)arg1 { %orig(
-        arg1
-    ); }
+- (void)setMediaTime:(id)arg1 { %orig(arg1); }
 %end
 
 %hook YTAppDelegate
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options {
-    BOOL r = %orig(
-        application,
-        options
-    );
+    BOOL r = %orig(application, options);
     @try {
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"showedWelcomeVC"];
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"automaticallyCheckForUpdates"];
@@ -188,9 +176,10 @@ static BOOL UYouIsEnabled(NSString *key) {
 %end
 
 %hook Statistics
-+ (void)update:(id)arg1 { %orig(
-        arg1
-    ); @try { [[%c(Statistics) sharedStatistics] recordDownloadStarted]; } @catch (id e) {} }
++ (void)update:(id)arg1 { 
+    %orig(arg1); 
+    @try { [[%c(Statistics) sharedStatistics] recordDownloadStarted]; } @catch (id e) {} 
+}
 %end
 
 %hook UIViewController
@@ -198,9 +187,7 @@ static BOOL UYouIsEnabled(NSString *key) {
     @try { return %orig; } @catch (NSException *e) { return [UITraitCollection currentTraitCollection]; }
 }
 - (void)traitCollectionDidChange:(UITraitCollection *)prev {
-    %orig(
-        prev
-    );
+    %orig(prev);
     @try {
         if (%c(DownloadsPagerVC)) {
             void (*fn)(void) = (void (*)(void))dlsym(RTLD_DEFAULT, "UYouRefreshAppearance");
@@ -249,19 +236,21 @@ static BOOL UYouIsEnabled(NSString *key) {
     UIImageView *iv = %orig;
     @try {
         UILabel *lab = [(id)self valueForKey:@"titleLabel"];
-        if ([lab.text containsString:@"uYou\n"]) {
+        if (lab && [lab.text containsString:@"uYou\n"]) {
             NSString *bp = [[NSBundle mainBundle] pathForResource:@"uYouUnofficial" ofType:@"bundle"];
             if (!bp) bp = [[NSBundle mainBundle] pathForResource:@"uYouBundle" ofType:@"bundle"];
-            NSBundle *b = [NSBundle bundleWithPath:bp];
-            NSString *ip = [b pathForResource:@"icon_clipped" ofType:@"png"];
-            UIImage *icon = [UIImage imageWithContentsOfFile:ip];
-            if (icon) {
-                CGSize sz = CGSizeMake(30, 30);
-                UIGraphicsBeginImageContextWithOptions(sz, NO, 0);
-                [icon drawInRect:CGRectMake(0, 0, sz.width, sz.height)];
-                UIImage *resized = UIGraphicsGetImageFromCurrentImageContext();
-                UIGraphicsEndImageContext();
-                [iv setImage:resized];
+            NSBundle *b = bp ? [NSBundle bundleWithPath:bp] : nil;
+            if (b) {
+                NSString *ip = [b pathForResource:@"icon_clipped" ofType:@"png"];
+                UIImage *icon = ip ? [UIImage imageWithContentsOfFile:ip] : nil;
+                if (icon) {
+                    CGSize sz = CGSizeMake(30, 30);
+                    UIGraphicsBeginImageContextWithOptions(sz, NO, 0);
+                    [icon drawInRect:CGRectMake(0, 0, sz.width, sz.height)];
+                    UIImage *resized = UIGraphicsGetImageFromCurrentImageContext();
+                    UIGraphicsEndImageContext();
+                    if (iv) [iv setImage:resized];
+                }
             }
         }
     } @catch (id e) {}
@@ -270,7 +259,7 @@ static BOOL UYouIsEnabled(NSString *key) {
 - (UILabel *)titleLabel {
     UILabel *lab = %orig;
     @try {
-        if ([lab.text containsString:@"uYou\n"] && ![lab.text containsString:@"uYou\n\n"]) {
+        if (lab && [lab.text containsString:@"uYou\n"] && ![lab.text containsString:@"uYou\n\n"]) {
             lab.text = [lab.text stringByReplacingOccurrencesOfString:@"uYou\n" withString:@"uYou\n\n"];
         }
     } @catch (id e) {}
