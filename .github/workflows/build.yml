@@ -47,7 +47,7 @@ jobs:
             local repo_url=$1
             git ls-remote "$repo_url" HEAD | awk '{print substr($1,1,7)}'
           }
-          echo "THEOS_COMMIT=$(get_commit_hash "https://github.com/roothide/theos")" >> $GITHUB_ENV
+          echo "THEOS_COMMIT=$(get_commit_hash "https://github.com/theos/theos")" >> $GITHUB_ENV
 
       - name: Cache Theos
         id: cache-theos
@@ -59,7 +59,7 @@ jobs:
       - name: Setup Theos
         if: ${{ steps.cache-theos.outputs.cache-hit != 'true' }}
         run: |
-          git clone --quiet --depth=1 --recurse-submodules https://github.com/roothide/theos.git ${{ github.workspace }}/theos
+          git clone --quiet --depth=1 --recurse-submodules https://github.com/theos/theos.git ${{ github.workspace }}/theos
           git clone --quiet --depth=1 -n --filter=tree:0 https://github.com/aricloverEXTRA/sdks.git
           cd sdks
           git sparse-checkout set --no-cone iPhoneOS18.6.sdk
