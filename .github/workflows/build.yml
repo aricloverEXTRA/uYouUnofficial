@@ -167,7 +167,7 @@ jobs:
           tag_name: v${{ env.UYOU_VERSION }}
           name: v${{ env.UYOU_VERSION }}
           files: |
-            com.miro.uyou_${{ env.UYOU_VERSION }}_iphoneos-arm.deb
-            com.miro.uyou_${{ env.UYOU_VERSION }}_iphoneos-arm64.deb
-            com.miro.uyou_${{ env.UYOU_VERSION }}_iphoneos-arm64e.deb
+            com.miro.uyouunofficial_${{ env.UYOU_VERSION }}_iphoneos-arm.deb
+            com.miro.uyouunofficial_${{ env.UYOU_VERSION }}_iphoneos-arm64.deb
+            com.miro.uyouunofficial_${{ env.UYOU_VERSION }}_iphoneos-arm64e.deb
           draft: true
