@@ -6,10 +6,14 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = uYouUnofficial
 
+# Recursively include every Objective-C / Objective-C++ source file
+# anywhere under Classes/.
 uYouUnofficial_FILES = Tweak.xm \
-	$(wildcard Classes/**/*.m) \
-	$(wildcard Classes/**/*.mm) \
-	$(wildcard Classes/Core/Downloads/*.xm) \
+	$(shell find Classes -type f \( \
+		-name '*.m' -o \
+		-name '*.mm' -o \
+		-name '*.xm' \
+	\) -print) \
 	$(wildcard Vendor/AFNetworking/*.m) \
 	$(wildcard Vendor/FMDB/*.m) \
 	$(wildcard Vendor/JGProgressHUD/*.m) \
@@ -23,6 +27,7 @@ uYouUnofficial_CFLAGS = -fobjc-arc \
 	-Wno-unused-function \
 	-DTWEAK_VERSION=\"3.0.6-unofficial\"
 
+# Classes include paths
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/Downloads
@@ -38,6 +43,7 @@ uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/UI/Cells
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/UI/ViewControllers
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/UI/Views
 
+# Vendor include paths
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/AFNetworking
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/FMDB
