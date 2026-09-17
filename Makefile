@@ -6,37 +6,27 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = uYouUnofficial
 
-uYouUnofficial_FILES = \
-	Tweak.xm \
+uYouUnofficial_FILES = Tweak.xm \
 	$(wildcard Classes/**/*.m) \
 	$(wildcard Classes/**/*.mm) \
-	$(wildcard Classes/**/*.xm)
+	$(wildcard Classes/**/*.xm) \
+	$(shell find Vendor -type f \( -name '*.m' -o -name '*.mm' \) \
+		! -path 'Vendor/LNPopup/LNPopupControllerExample/*' \
+		! -path 'Vendor/Lottie/Example*' \
+		! -path 'Vendor/Lottie/Example-Swift/*' \
+		! -path 'Vendor/Lottie/lottie-ios/*' \
+		! -path 'Vendor/Lottie/MacOS_Viewer/*' \
+		! -path 'Vendor/SDWebImage/Examples/*' \
+		! -path 'Vendor/SDWebImage/Tests/*' \
+		! -path 'Vendor/AFNetworking/Example/*' \
+		! -path 'Vendor/AFNetworking/Tests/*' \
+		! -path 'Vendor/GCDWebServer/Tests/*' \
+		! -path 'Vendor/FMDB/Tests/*' \
+		! -path 'Vendor/SDWebImage/SDWebImageMapKit/*' \
+		! -path 'Vendor/SDWebImage/FLAnimatedImage/*' \
+		-print)
 
-uYouUnofficial_FILES += \
-	Vendor/GCDWebServer/GCDWebServer/Core/GCDWebServer.m \
-	Vendor/GCDWebServer/GCDWebServer/Core/GCDWebServerConnection.m \
-	Vendor/GCDWebServer/GCDWebServer/Core/GCDWebServerDataRequest.m \
-	Vendor/GCDWebServer/GCDWebServer/Core/GCDWebServerDataResponse.m \
-	Vendor/GCDWebServer/GCDWebServer/Core/GCDWebServerErrorResponse.m \
-	Vendor/GCDWebServer/GCDWebServer/Core/GCDWebServerFileRequest.m \
-	Vendor/GCDWebServer/GCDWebServer/Core/GCDWebServerFileResponse.m \
-	Vendor/GCDWebServer/GCDWebServer/Core/GCDWebServerFunctions.m \
-	Vendor/GCDWebServer/GCDWebServer/Core/GCDWebServerMultiPartFormRequest.m \
-	Vendor/GCDWebServer/GCDWebServer/Core/GCDWebServerRequest.m \
-	Vendor/GCDWebServer/GCDWebServer/Core/GCDWebServerResponse.m \
-	Vendor/GCDWebServer/GCDWebServer/Core/GCDWebServerStreamedResponse.m \
-	Vendor/GCDWebServer/GCDWebServer/Core/GCDWebServerURLEncodedFormRequest.m
-
-uYouUnofficial_FILES += \
-	$(wildcard Vendor/AFNetworking/*.m) \
-	$(wildcard Vendor/FMDB/*.m) \
-	$(wildcard Vendor/JGProgressHUD/*.m) \
-	$(wildcard Vendor/Lottie/*.m) \
-	$(wildcard Vendor/Others/*.m) \
-	$(wildcard Vendor/SDWebImage/*.m)
-
-uYouUnofficial_CFLAGS = \
-	-fobjc-arc \
+uYouUnofficial_CFLAGS = -fobjc-arc \
 	-Wno-deprecated-declarations \
 	-Wno-unused-variable \
 	-Wno-unused-function \
@@ -80,26 +70,14 @@ uYouUnofficial_FRAMEWORKS = \
 	Security \
 	MediaPlayer
 
-uYouUnofficial_LIBRARIES = \
-	bz2 \
-	c++ \
-	iconv \
-	z \
-	sqlite3
+uYouUnofficial_LIBRARIES = bz2 iconv z sqlite3
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
 .PHONY: package-all
-
 package-all:
-	$(MAKE) package ARCHS="arm64"
-	$(MAKE) package ARCHS="arm64e"
-	$(MAKE) package ARCHS="armv7"
+	$(MAKE) package ARCHS="arm64 arm64e"
 
 .PHONY: clean-all
-
 clean-all:
-	$(MAKE) clean ARCHS="arm64"
-	$(MAKE) clean ARCHS="arm64e"
-	$(MAKE) clean ARCHS="armv7"
-
+	$(MAKE) clean ARCHS="arm64 arm64e"
