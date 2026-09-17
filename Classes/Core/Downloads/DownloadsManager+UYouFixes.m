@@ -4,6 +4,21 @@
 #import <sqlite3.h>
 #import <HBLog.h>
 
+@protocol UYouLegacyDownloadItem <NSObject>
+@optional
+- (NSString *)tmpAudioPath;
+- (NSString *)cachedAudioPath;
+- (NSString *)tmpVideoPath;
+- (NSString *)cachedVideoPath;
+- (NSString *)filePath;
+- (void)setTmpAudioPath:(NSString *)path;
+@end
+
+@protocol UYouLegacyDownloadContainer <NSObject>
+@optional
+- (id<UYouLegacyDownloadItem>)uYouItem;
+@end
+
 // Baked-in fixes from uYouPatches.xm — no external patch dylib needed.
 // This file augments DownloadsManager with webm→m4a conversion, ffmpeg remux,
 // stall watchdog, and DB finalization. The original DownloadsManager.m stays
@@ -15,11 +30,12 @@ static BOOL UYouPathIsWebm(NSString *path) {
 
 static NSString *UYouAudioPathForItem(id ui) {
     if (!ui) return nil;
-    if ([ui respondsToSelector:@selector(tmpAudioPath)]) {
-        NSString *p = [ui tmpAudioPath];
+    id<UYouLegacyDownloadItem> item = ui;
+    if ([item respondsToSelector:@selector(tmpAudioPath)]) {
+        NSString *p = [item tmpAudioPath];
         if (p.length) return p;
     }
-    if ([ui respondsToSelector:@selector(cachedAudioPath)]) return [ui cachedAudioPath];
+    if ([item respondsToSelector:@selector(cachedAudioPath)]) return [item cachedAudioPath];
     return nil;
 }
 
@@ -42,15 +58,23 @@ static BOOL UYouConvertWebmToM4a(NSString *webm, NSString *m4a) {
 - (BOOL)uyou_ensureMergeableAudioForItem:(id)item phase:(NSString *)phase {
     @try {
         id ui = item;
-        if ([item respondsToSelector:@selector(uYouItem)]) {
-            @try { ui = [item uYouItem]; } @catch (id e) {}
+        id<UYouLegacyDownloadContainer> container = item;
+        if ([container respondsToSelector:@selector(uYouItem)]) {
+            @try { ui = [container uYouItem]; } @catch (id e) {}
         }
         NSString *audioPath = UYouAudioPathForItem(ui);
         if (!audioPath.length) return YES;
         if (!UYouPathIsWebm(audioPath)) return YES;
         NSString *m4a = [[audioPath stringByDeletingPathExtension] stringByAppendingPathExtension:@"m4a"];
         if (UYouConvertWebmToM4a(audioPath, m4a)) {
-            @try { [ui setValue:m4a forKey:@"tmpAudioPath"]; } @catch (id e) {}
+            @try {
+                id<UYouLegacyDownloadItem> legacy = ui;
+                if ([legacy respondsToSelector:@selector(setTmpAudioPath:)]) {
+                    [legacy setTmpAudioPath:m4a];
+                } else {
+                    [ui setValue:m4a forKey:@"tmpAudioPath"];
+                }
+            } @catch (id e) {}
             HBLogInfo(@"[uYou] %@: webm→m4a done", phase);
             return YES;
         }
@@ -62,14 +86,16 @@ static BOOL UYouConvertWebmToM4a(NSString *webm, NSString *m4a) {
 - (BOOL)uyou_remuxWithFFmpegForItem:(id)item phase:(NSString *)phase {
     @try {
         id ui = item;
-        if ([item respondsToSelector:@selector(uYouItem)]) { @try { ui = [item uYouItem]; } @catch (id e) {} }
+        id<UYouLegacyDownloadContainer> container = item;
+        if ([container respondsToSelector:@selector(uYouItem)]) { @try { ui = [container uYouItem]; } @catch (id e) {} }
         NSFileManager *fm = [NSFileManager defaultManager];
+        id<UYouLegacyDownloadItem> legacy = ui;
         NSString *vPath = nil, *aPath = nil;
-        if ([ui respondsToSelector:@selector(tmpVideoPath)]) vPath = [ui tmpVideoPath];
-        if (!vPath.length && [ui respondsToSelector:@selector(cachedVideoPath)]) vPath = [ui cachedVideoPath];
-        if ([ui respondsToSelector:@selector(tmpAudioPath)]) aPath = [ui tmpAudioPath];
-        if (!aPath.length && [ui respondsToSelector:@selector(cachedAudioPath)]) aPath = [ui cachedAudioPath];
-        NSString *final = [ui respondsToSelector:@selector(filePath)] ? [ui filePath] : nil;
+        if ([legacy respondsToSelector:@selector(tmpVideoPath)]) vPath = [legacy tmpVideoPath];
+        if (!vPath.length && [legacy respondsToSelector:@selector(cachedVideoPath)]) vPath = [legacy cachedVideoPath];
+        if ([legacy respondsToSelector:@selector(tmpAudioPath)]) aPath = [legacy tmpAudioPath];
+        if (!aPath.length && [legacy respondsToSelector:@selector(cachedAudioPath)]) aPath = [legacy cachedAudioPath];
+        NSString *final = [legacy respondsToSelector:@selector(filePath)] ? [legacy filePath] : nil;
         if (!vPath.length || !aPath.length || !final.length) return NO;
         if (![fm fileExistsAtPath:vPath] || ![fm fileExistsAtPath:aPath]) return NO;
         if (UYTFFActiveBackend() == UYTFFBackendNone) return NO;
