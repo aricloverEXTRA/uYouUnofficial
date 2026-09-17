@@ -6,25 +6,19 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = uYouUnofficial
 
-uYouUnofficial_FILES = \
-	Tweak.xm \
+uYouUnofficial_FILES = Tweak.xm \
 	$(wildcard Classes/**/*.m) \
 	$(wildcard Classes/**/*.mm) \
-	$(wildcard Classes/**/*.xm)
+	$(wildcard Classes/**/*.xm) \
+	Vendor/AFNetworking/*.m \
+	Vendor/FMDB/*.m \
+	Vendor/JGProgressHUD/*.m \
+	Vendor/Lottie/*.m \
+	Vendor/Others/*.m \
+	Vendor/SDWebImage/*.m \
+	Vendor/GCDWebServer/GCDWebServer/*.m
 
-uYouUnofficial_FILES += \
-	$(wildcard Vendor/GCDWebServer/GCDWebServer/Core/*.m)
-
-uYouUnofficial_FILES += \
-	$(wildcard Vendor/AFNetworking/*.m) \
-	$(wildcard Vendor/FMDB/*.m) \
-	$(wildcard Vendor/JGProgressHUD/*.m) \
-	$(wildcard Vendor/Lottie/*.m) \
-	$(wildcard Vendor/Others/*.m) \
-	$(wildcard Vendor/SDWebImage/*.m)
-
-uYouUnofficial_CFLAGS = \
-	-fobjc-arc \
+uYouUnofficial_CFLAGS = -fobjc-arc \
 	-Wno-deprecated-declarations \
 	-Wno-unused-variable \
 	-Wno-unused-function \
@@ -44,49 +38,28 @@ uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/UI
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/UI/Cells
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/UI/ViewControllers
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/UI/Views
+
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/AFNetworking
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/FMDB
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/GCDWebServer
+uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/GCDWebServer/GCDWebServer
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/JGProgressHUD
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/LNPopup
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/LNPopup/LNPopupController
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/LNPopup/LNPopupController/LNPopupController
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/LNPopup/LNPopupController/LNPopupController/Private
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/Lottie
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/Others
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/SDWebImage
 
-uYouUnofficial_FRAMEWORKS = \
-	UIKit \
-	Foundation \
-	AVFoundation \
-	AVKit \
-	Photos \
-	CoreMotion \
-	VideoToolbox \
-	Security \
-	MediaPlayer
-
-uYouUnofficial_LIBRARIES = \
-	bz2 \
-	c++ \
-	iconv \
-	z \
-	sqlite3
+uYouUnofficial_FRAMEWORKS = UIKit Foundation AVFoundation AVKit Photos CoreMotion VideoToolbox Security MediaPlayer
+uYouUnofficial_LIBRARIES = bz2 c++ iconv z sqlite3
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
 .PHONY: package-all
-
 package-all:
 	$(MAKE) package ARCHS="arm64"
 	$(MAKE) package ARCHS="arm64e"
-	$(MAKE) package ARCHS="armv7"
 
 .PHONY: clean-all
-
 clean-all:
 	$(MAKE) clean ARCHS="arm64"
 	$(MAKE) clean ARCHS="arm64e"
-	$(MAKE) clean ARCHS="armv7"
