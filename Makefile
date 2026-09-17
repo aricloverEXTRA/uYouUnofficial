@@ -9,7 +9,7 @@ TWEAK_NAME = uYouUnofficial
 # Core source files
 # Use find instead of wildcard ** so nested .m/.mm/.xm files are included.
 uYouUnofficial_FILES = Tweak.xm \
-	$(shell find Classes -type f \( -name '*.m' -o -name '*.mm' -o -name '*.xm' \)) \
+	$(shell find $(THEOS_PROJECT_DIR)/Classes -type f \( -name '*.m' -o -name '*.mm' -o -name '*.xm' \)) \
 	$(filter-out \
 		Vendor/LNPopup/LNPopupControllerExample/% \
 		Vendor/Lottie/Example% \
@@ -18,7 +18,6 @@ uYouUnofficial_FILES = Tweak.xm \
 		Vendor/Lottie/MacOS_Viewer/% \
 		Vendor/SDWebImage/Examples/% \
 		Vendor/SDWebImage/Tests/% \
-		Vendor/SDWebImage/UIKit+AFNetworking/% \
 		Vendor/AFNetworking/Example/% \
 		Vendor/AFNetworking/Tests/% \
 		Vendor/GCDWebServer/Tests/% \
@@ -30,7 +29,7 @@ uYouUnofficial_FILES = Tweak.xm \
 		Vendor/SDWebImage/SDWebImageMapKit/% \
 		Vendor/SDWebImage/MKAnnotationView+WebCache.m \
 		Vendor/SDWebImage/FLAnimatedImage/% \
-		,$(shell find Vendor -type f \( -name '*.m' -o -name '*.mm' \)))
+		,$(wildcard Vendor/**/*.m) $(wildcard Vendor/**/*.mm)))
 
 uYouUnofficial_CFLAGS = -fobjc-arc \
 	-Wno-deprecated-declarations \
