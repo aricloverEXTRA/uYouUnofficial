@@ -9,7 +9,7 @@ TWEAK_NAME = uYouUnofficial
 uYouUnofficial_FILES = Tweak.xm \
 	$(wildcard Classes/**/*.m) \
 	$(wildcard Classes/**/*.mm) \
-	$(wildcard Classes/**/*.xm) \
+	$(wildcard Classes/Core/Downloads/*.xm) \
 	$(wildcard Vendor/AFNetworking/*.m) \
 	$(wildcard Vendor/FMDB/*.m) \
 	$(wildcard Vendor/JGProgressHUD/*.m) \
