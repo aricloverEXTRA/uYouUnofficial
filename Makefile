@@ -10,13 +10,12 @@ uYouUnofficial_FILES = Tweak.xm \
 	$(wildcard Classes/**/*.m) \
 	$(wildcard Classes/**/*.mm) \
 	$(wildcard Classes/**/*.xm) \
-	Vendor/AFNetworking/*.m \
-	Vendor/FMDB/*.m \
-	Vendor/JGProgressHUD/*.m \
-	Vendor/Lottie/*.m \
-	Vendor/Others/*.m \
-	Vendor/SDWebImage/*.m \
-	Vendor/GCDWebServer/GCDWebServer/*.m
+	$(wildcard Vendor/AFNetworking/*.m) \
+	$(wildcard Vendor/FMDB/*.m) \
+	$(wildcard Vendor/JGProgressHUD/*.m) \
+	$(wildcard Vendor/Lottie/*.m) \
+	$(wildcard Vendor/Others/*.m) \
+	$(wildcard Vendor/SDWebImage/*.m)
 
 uYouUnofficial_CFLAGS = -fobjc-arc \
 	-Wno-deprecated-declarations \
@@ -43,7 +42,6 @@ uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/AFNetworking
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/FMDB
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/GCDWebServer
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/GCDWebServer/GCDWebServer
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/JGProgressHUD
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/Lottie
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/Others
