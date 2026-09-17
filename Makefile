@@ -7,11 +7,44 @@ include $(THEOS)/makefiles/common.mk
 TWEAK_NAME = uYouUnofficial
 
 # Core source files (Classes + baked pipeline + Tweak.xm)
-uYouUnofficial_FILES = Tweak.xm $(wildcard Classes/**/*.m) $(wildcard Classes/**/*.mm) $(wildcard Classes/**/*.xm) $(filter-out Vendor/LNPopup/LNPopupControllerExample/% Vendor/Lottie/Example% Vendor/Lottie/Example-Swift/% Vendor/Lottie/lottie-ios/% Vendor/Lottie/MacOS_Viewer/% Vendor/SDWebImage/Examples/% Vendor/SDWebImage/Tests/% Vendor/AFNetworking/Example/% Vendor/AFNetworking/Tests/% Vendor/AFNetworking/UIKit+AFNetworking/% Vendor/GCDWebServer/Tests/% Vendor/FMDB/Tests/% Vendor/SDWebImage/NSBezierPath+SDRoundedCorners.m Vendor/SDWebImage/NSButton+WebCache.m Vendor/SDWebImage/NSImage+Compatibility.m Vendor/SDWebImage/SDAnimatedImageRep.m Vendor/SDWebImage/SDWebImageMapKit/% Vendor/SDWebImage/MKAnnotationView+WebCache.m Vendor/SDWebImage/FLAnimatedImage/%,$(wildcard Vendor/**/*.m) $(wildcard Vendor/**/*.mm))
-
+uYouUnofficial_FILES = Tweak.xm $(wildcard Classes/**/*.m) $(wildcard Classes/**/*.mm) $(wildcard Classes/**/*.xm) $(filter-out \
+	Vendor/LNPopup/LNPopupControllerExample/% \
+	Vendor/Lottie/Example% \
+	Vendor/Lottie/Example-Swift/% \
+	Vendor/Lottie/lottie-ios/% \
+	Vendor/Lottie/MacOS_Viewer/% \
+	Vendor/SDWebImage/Examples/% \
+	Vendor/SDWebImage/Tests/% \
+	Vendor/SDWebImage/UIKit+AFNetworking/% \
+	Vendor/AFNetworking/Example/% \
+	Vendor/AFNetworking/Tests/% \
+	Vendor/GCDWebServer/Tests/% \
+	Vendor/FMDB/Tests/% \
+	Vendor/SDWebImage/NSBezierPath+SDRoundedCorners.m \
+	Vendor/SDWebImage/NSButton+WebCache.m \
+	Vendor/SDWebImage/NSImage+Compatibility.m \
+	Vendor/SDWebImage/SDAnimatedImageRep.m \
+	Vendor/SDWebImage/SDWebImageMapKit/% \
+	Vendor/SDWebImage/MKAnnotationView+WebCache.m \
+	Vendor/SDWebImage/FLAnimatedImage/% \
+	,$(wildcard Vendor/**/*.m) $(wildcard Vendor/**/*.mm))
 
 uYouUnofficial_CFLAGS = -fobjc-arc -Wno-deprecated-declarations -Wno-unused-variable -Wno-unused-function -DTWEAK_VERSION=\"3.0.6-unofficial\"
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes -I$(THEOS_PROJECT_DIR)/Classes/Core -I$(THEOS_PROJECT_DIR)/Classes/Core/Downloads -I$(THEOS_PROJECT_DIR)/Classes/Core/Gestures -I$(THEOS_PROJECT_DIR)/Classes/Core/Models -I$(THEOS_PROJECT_DIR)/Classes/Core/Player -I$(THEOS_PROJECT_DIR)/Classes/Core/Settings -I$(THEOS_PROJECT_DIR)/Classes/Core/Utils -I$(THEOS_PROJECT_DIR)/Classes/Core/Welcome -I$(THEOS_PROJECT_DIR)/Classes/Core/MediaKit -I$(THEOS_PROJECT_DIR)/Classes/UI -I$(THEOS_PROJECT_DIR)/Classes/UI/Cells -I$(THEOS_PROJECT_DIR)/Classes/UI/ViewControllers -I$(THEOS_PROJECT_DIR)/Classes/UI/Views -I$(THEOS_PROJECT_DIR)/Vendor
+uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes
+uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core
+uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/Downloads
+uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/Gestures
+uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/Models
+uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/Player
+uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/Settings
+uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/Utils
+uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/Welcome
+uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/MediaKit
+uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/UI
+uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/UI/Cells
+uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/UI/ViewControllers
+uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/UI/Views
+uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/AFNetworking
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/FMDB
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/GCDWebServer
@@ -27,7 +60,7 @@ uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/SDWebImage
 uYouUnofficial_FRAMEWORKS = UIKit Foundation AVFoundation AVKit Photos CoreMotion VideoToolbox Security MediaPlayer
 uYouUnofficial_LIBRARIES = bz2 c++ iconv z sqlite3
 
-# Bundle is installed via Layout/ to match original deb path: /Library/Application Support/uYouUnofficial.bundle
+# Bundle is installed via Layout/ to match original deb path: /Library/Application Support/uYouBundle.bundle
 # Theos EMBED_BUNDLES would place it under /Library/MobileSubstrate/DynamicLibraries — wrong location
 
 
