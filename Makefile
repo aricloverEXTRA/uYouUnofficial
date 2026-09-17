@@ -6,27 +6,25 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = uYouUnofficial
 
-uYouUnofficial_FILES = Tweak.xm \
+uYouUnofficial_FILES = \
+	Tweak.xm \
 	$(wildcard Classes/**/*.m) \
 	$(wildcard Classes/**/*.mm) \
-	$(wildcard Classes/**/*.xm) \
-	$(shell find Vendor -type f \( -name '*.m' -o -name '*.mm' \) \
-		! -path 'Vendor/LNPopup/LNPopupControllerExample/*' \
-		! -path 'Vendor/Lottie/Example*' \
-		! -path 'Vendor/Lottie/Example-Swift/*' \
-		! -path 'Vendor/Lottie/lottie-ios/*' \
-		! -path 'Vendor/Lottie/MacOS_Viewer/*' \
-		! -path 'Vendor/SDWebImage/Examples/*' \
-		! -path 'Vendor/SDWebImage/Tests/*' \
-		! -path 'Vendor/AFNetworking/Example/*' \
-		! -path 'Vendor/AFNetworking/Tests/*' \
-		! -path 'Vendor/GCDWebServer/Tests/*' \
-		! -path 'Vendor/FMDB/Tests/*' \
-		! -path 'Vendor/SDWebImage/SDWebImageMapKit/*' \
-		! -path 'Vendor/SDWebImage/FLAnimatedImage/*' \
-		-print)
+	$(wildcard Classes/**/*.xm)
 
-uYouUnofficial_CFLAGS = -fobjc-arc \
+uYouUnofficial_FILES += \
+	$(wildcard Vendor/GCDWebServer/GCDWebServer/Core/*.m)
+
+uYouUnofficial_FILES += \
+	$(wildcard Vendor/AFNetworking/*.m) \
+	$(wildcard Vendor/FMDB/*.m) \
+	$(wildcard Vendor/JGProgressHUD/*.m) \
+	$(wildcard Vendor/Lottie/*.m) \
+	$(wildcard Vendor/Others/*.m) \
+	$(wildcard Vendor/SDWebImage/*.m)
+
+uYouUnofficial_CFLAGS = \
+	-fobjc-arc \
 	-Wno-deprecated-declarations \
 	-Wno-unused-variable \
 	-Wno-unused-function \
@@ -70,14 +68,25 @@ uYouUnofficial_FRAMEWORKS = \
 	Security \
 	MediaPlayer
 
-uYouUnofficial_LIBRARIES = bz2 iconv z sqlite3
+uYouUnofficial_LIBRARIES = \
+	bz2 \
+	c++ \
+	iconv \
+	z \
+	sqlite3
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
 .PHONY: package-all
+
 package-all:
-	$(MAKE) package ARCHS="arm64 arm64e"
+	$(MAKE) package ARCHS="arm64"
+	$(MAKE) package ARCHS="arm64e"
+	$(MAKE) package ARCHS="armv7"
 
 .PHONY: clean-all
+
 clean-all:
-	$(MAKE) clean ARCHS="arm64 arm64e"
+	$(MAKE) clean ARCHS="arm64"
+	$(MAKE) clean ARCHS="arm64e"
+	$(MAKE) clean ARCHS="armv7"
