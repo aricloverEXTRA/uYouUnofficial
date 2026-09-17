@@ -6,30 +6,25 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = uYouUnofficial
 
-# Core source files
-# Use find instead of wildcard ** so nested .m/.mm/.xm files are included.
 uYouUnofficial_FILES = Tweak.xm \
-	$(shell find $(THEOS_PROJECT_DIR)/Classes -type f \( -name '*.m' -o -name '*.mm' -o -name '*.xm' \)) \
-	$(filter-out \
-		Vendor/LNPopup/LNPopupControllerExample/% \
-		Vendor/Lottie/Example% \
-		Vendor/Lottie/Example-Swift/% \
-		Vendor/Lottie/lottie-ios/% \
-		Vendor/Lottie/MacOS_Viewer/% \
-		Vendor/SDWebImage/Examples/% \
-		Vendor/SDWebImage/Tests/% \
-		Vendor/AFNetworking/Example/% \
-		Vendor/AFNetworking/Tests/% \
-		Vendor/GCDWebServer/Tests/% \
-		Vendor/FMDB/Tests/% \
-		Vendor/SDWebImage/NSBezierPath+SDRoundedCorners.m \
-		Vendor/SDWebImage/NSButton+WebCache.m \
-		Vendor/SDWebImage/NSImage+Compatibility.m \
-		Vendor/SDWebImage/SDAnimatedImageRep.m \
-		Vendor/SDWebImage/SDWebImageMapKit/% \
-		Vendor/SDWebImage/MKAnnotationView+WebCache.m \
-		Vendor/SDWebImage/FLAnimatedImage/% \
-		,$(wildcard Vendor/**/*.m) $(wildcard Vendor/**/*.mm)))
+	$(wildcard Classes/**/*.m) \
+	$(wildcard Classes/**/*.mm) \
+	$(wildcard Classes/**/*.xm) \
+	$(shell find Vendor -type f \( -name '*.m' -o -name '*.mm' \) \
+		! -path 'Vendor/LNPopup/LNPopupControllerExample/*' \
+		! -path 'Vendor/Lottie/Example*' \
+		! -path 'Vendor/Lottie/Example-Swift/*' \
+		! -path 'Vendor/Lottie/lottie-ios/*' \
+		! -path 'Vendor/Lottie/MacOS_Viewer/*' \
+		! -path 'Vendor/SDWebImage/Examples/*' \
+		! -path 'Vendor/SDWebImage/Tests/*' \
+		! -path 'Vendor/AFNetworking/Example/*' \
+		! -path 'Vendor/AFNetworking/Tests/*' \
+		! -path 'Vendor/GCDWebServer/Tests/*' \
+		! -path 'Vendor/FMDB/Tests/*' \
+		! -path 'Vendor/SDWebImage/SDWebImageMapKit/*' \
+		! -path 'Vendor/SDWebImage/FLAnimatedImage/*' \
+		-print)
 
 uYouUnofficial_CFLAGS = -fobjc-arc \
 	-Wno-deprecated-declarations \
@@ -75,27 +70,14 @@ uYouUnofficial_FRAMEWORKS = \
 	Security \
 	MediaPlayer
 
-uYouUnofficial_LIBRARIES = bz2 c++ iconv z sqlite3
-
-# Bundle is installed via Layout/ to match:
-# /Library/Application Support/uYouBundle.bundle
-#
-# Theos EMBED_BUNDLES would place it under:
-# /Library/MobileSubstrate/DynamicLibraries
-#
-# so the bundle remains installed through Layout/.
+uYouUnofficial_LIBRARIES = bz2 iconv z sqlite3
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
-# Multi-arch build targets
 .PHONY: package-all
 package-all:
-	$(MAKE) package ARCHS="arm64"
-	$(MAKE) package ARCHS="arm64e"
-	$(MAKE) package ARCHS="armv7"
+	$(MAKE) package ARCHS="arm64 arm64e"
 
 .PHONY: clean-all
 clean-all:
-	$(MAKE) clean ARCHS="arm64"
-	$(MAKE) clean ARCHS="arm64e"
-	$(MAKE) clean ARCHS="armv7"
+	$(MAKE) clean ARCHS="arm64 arm64e"
