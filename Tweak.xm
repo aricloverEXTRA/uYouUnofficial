@@ -3,6 +3,7 @@
 #import <HBLog.h>
 #import <rootless.h>
 #import <dlfcn.h>
+#import <objc/message.h>
 
 #import <YouTubeHeader/YTIPivotBarRenderer.h>
 #import <YouTubeHeader/YTIPivotBarSupportedRenderers.h>
@@ -10,11 +11,14 @@
 #import <YouTubeHeader/YTCommonColorPalette.h>
 #import <YouTubeHeader/YTSettingsSectionItem.h>
 #import <YouTubeHeader/YTSettingsCell.h>
+#import <YouTubeHeader/YTMainAppControlsOverlayView.h>
+#import <YouTubeHeader/YTReelWatchPlaybackOverlayView.h>
 
 #import "Classes/UI/ViewControllers/DownloadsPagerVC.h"
 #import "Classes/Core/Player/PlayerManager.h"
 #import "Classes/Core/Utils/Statistics.h"
 #import "Classes/Core/Settings/SettingsVC.h"
+#import "Classes/Core/Downloads/UYTSABR.h"
 
 
 @class YTInlineMutedPlaybackWatchController;
@@ -29,6 +33,116 @@
 static BOOL UYouIsEnabled(NSString *key) {
     return [[NSUserDefaults standardUserDefaults] boolForKey:key];
 }
+
+static const NSInteger UYouDownloadButtonTag = 9842;
+
+static UIViewController *UYouTopViewController(UIViewController *controller) {
+    UIViewController *top = controller;
+    while (top.presentedViewController) top = top.presentedViewController;
+    return top;
+}
+
+static UIViewController *UYouViewControllerForView(UIView *view) {
+    UIResponder *responder = view;
+    while (responder) {
+        if ([responder isKindOfClass:[UIViewController class]]) {
+            return (UIViewController *)responder;
+        }
+        responder = [responder nextResponder];
+    }
+    return nil;
+}
+
+static NSString *UYouStringFromObject(id object, SEL selector) {
+    if (!object || ![object respondsToSelector:selector]) return nil;
+    @try {
+        id value = ((id (*)(id, SEL))objc_msgSend)(object, selector);
+        return [value isKindOfClass:[NSString class]] ? value : nil;
+    } @catch (__unused NSException *exception) {
+        return nil;
+    }
+}
+
+static void UYouStartSABRDownload(UIView *sender) {
+    UIViewController *presenter = UYouTopViewController(UYouViewControllerForView(sender));
+    id player = presenter;
+    while (player && !UYouStringFromObject(player, @selector(currentVideoID))) {
+        player = [player parentViewController];
+    }
+    NSString *videoID = UYouStringFromObject(player, @selector(currentVideoID));
+    if (!videoID.length) {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"uYou Download" message:@"Open a video before downloading." preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+        [presenter presentViewController:alert animated:YES completion:nil];
+        return;
+    }
+
+    NSString *title = UYouStringFromObject(player, @selector(title));
+    if (!title.length) title = videoID;
+    UYTSABRFallbackDownloadForVideoID(videoID, title, NO, ^(BOOL success, NSString *error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *message = success ? @"Saved to the uYouDownloads folder." : (error ?: @"Download failed.");
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:success ? @"Download complete" : @"Download failed" message:message preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+            [presenter presentViewController:alert animated:YES completion:nil];
+        });
+    });
+}
+
+%group gDownloadButtons
+
+static UIButton *UYouMakeDownloadButton(id target, SEL action) {
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
+    button.tag = UYouDownloadButtonTag;
+    button.accessibilityIdentifier = @"uYou.download.button";
+    button.accessibilityLabel = @"Download";
+    UIImageSymbolConfiguration *configuration = [UIImageSymbolConfiguration configurationWithPointSize:20 weight:UIImageSymbolWeightMedium];
+    UIImage *image = [UIImage systemImageNamed:@"arrow.down.circle" withConfiguration:configuration];
+    [button setImage:image forState:UIControlStateNormal];
+    button.tintColor = UIColor.whiteColor;
+    button.backgroundColor = UIColor.clearColor;
+    button.exclusiveTouch = YES;
+    [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
+    return button;
+}
+
+%hook YTMainAppControlsOverlayView
+- (void)layoutSubviews {
+    %orig;
+    UIButton *button = (UIButton *)[self viewWithTag:UYouDownloadButtonTag];
+    if (!button) {
+        button = UYouMakeDownloadButton(self, @selector(uYouDownloadButtonTapped:));
+        [self addSubview:button];
+    }
+    CGFloat side = 44.0;
+    button.frame = CGRectMake(CGRectGetWidth(self.bounds) - side - 12.0, 12.0, side, side);
+    [self bringSubviewToFront:button];
+}
+
+%new - (void)uYouDownloadButtonTapped:(UIButton *)sender {
+    UYouStartSABRDownload(sender);
+}
+%end
+
+%hook YTReelWatchPlaybackOverlayView
+- (void)layoutSubviews {
+    %orig;
+    UIButton *button = (UIButton *)[self viewWithTag:UYouDownloadButtonTag];
+    if (!button) {
+        button = UYouMakeDownloadButton(self, @selector(uYouDownloadButtonTapped:));
+        [self addSubview:button];
+    }
+    CGFloat side = 44.0;
+    button.frame = CGRectMake(CGRectGetWidth(self.bounds) - side - 10.0, CGRectGetHeight(self.bounds) * 0.5 - side * 0.5, side, side);
+    [self bringSubviewToFront:button];
+}
+
+%new - (void)uYouDownloadButtonTapped:(UIButton *)sender {
+    UYouStartSABRDownload(sender);
+}
+%end
+
+%end // gDownloadButtons
 
 
 /*
@@ -130,7 +244,9 @@ static BOOL UYouIsEnabled(NSString *key) {
     }
 
 
-    %orig(renderer);
+    %orig(
+        renderer
+    );
 }
 
 %end
@@ -372,7 +488,9 @@ static BOOL UYouIsEnabled(NSString *key) {
 %group gPlayer2
 
 %hook YTInlineMutedPlaybackWatchController
-
++ (void)updatePageStyles {
+    %orig;
+}
 - (void)startPlayback {
     %orig;
 }
@@ -392,9 +510,13 @@ static BOOL UYouIsEnabled(NSString *key) {
 %group gPlayer3
 
 %hook YTPlaybackConfig
-
+- (void)startPlayback {
+    %orig;
+}
 - (void)setStartPlayback:(id)arg1 {
-    %orig(arg1);
+    %orig(
+        arg1
+    );
 }
 
 %end
@@ -432,13 +554,17 @@ static BOOL UYouIsEnabled(NSString *key) {
 %group gPlayer5
 
 %hook YTMainAppVideoPlayerOverlayViewController
-
+- (void)updatePlayerViewWithActivePlayerOverlay {
+    %orig;
+}
 - (void)mediaTime {
     %orig;
 }
 
 - (void)setMediaTime:(id)arg1 {
-    %orig(arg1);
+    %orig(
+        arg1
+    );
 }
 
 %end
@@ -502,7 +628,9 @@ static BOOL UYouIsEnabled(NSString *key) {
 
 + (void)update:(id)arg1 {
 
-    %orig(arg1);
+    %orig(
+        arg1
+    );
 
 
     @try {
@@ -534,7 +662,9 @@ static BOOL UYouIsEnabled(NSString *key) {
 
 - (void)traitCollectionDidChange:(UITraitCollection *)prev {
 
-    %orig(prev);
+    %orig(
+        prev
+    );
 
 
     @try {
@@ -806,6 +936,8 @@ static BOOL UYouIsEnabled(NSString *key) {
  */
 
 %ctor {
+
+    %init(gDownloadButtons);
 
     %init(gMain);
 
