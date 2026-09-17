@@ -265,7 +265,7 @@ static NSData *SABREncodeBufferedRange(YMSABRFormat *fmt, uint64_t startSeg, uin
     return br;
 }
 
-pragma mark - Response part decoders (MEDIA_HEADER / FORMAT_INIT)
+#pragma mark - Response part decoders (MEDIA_HEADER / FORMAT_INIT)
 
 @interface YMSABRMediaHeader : NSObject
 @property (nonatomic, assign) uint64_t headerId;
