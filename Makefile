@@ -12,7 +12,8 @@ uYouUnofficial_FILES = Tweak.xm \
 	$(shell find Classes -type f \( \
 		-name '*.m' -o \
 		-name '*.mm' -o \
-		-name '*.xm' \
+		-name '*.xm' -o \
+		-name '*.h' -o \
 	\) -print) \
 	$(wildcard Vendor/AFNetworking/*.m) \
 	$(wildcard Vendor/FMDB/*.m) \
