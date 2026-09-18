@@ -1,5 +1,4 @@
 #import "DownloadingVC.h"
-#import "DownloadingCell.h"
 #import "DownloadsManager.h"
 #import "DownloadItem.h"
 
