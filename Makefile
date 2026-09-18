@@ -6,6 +6,8 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = uYouUnofficial
 
+UYOU_ROOT = $(CURDIR)
+
 # Recursively include every Objective-C / Objective-C++ source file
 # anywhere under Classes/.
 uYouUnofficial_FILES = Tweak.xm \
@@ -28,28 +30,28 @@ uYouUnofficial_CFLAGS = -fobjc-arc \
 	-DTWEAK_VERSION=\"3.0.6-unofficial\"
 
 # Classes include paths
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/Downloads
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/Models
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/Player
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/Settings
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/Utils
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/Welcome
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/MediaKit
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/UI
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/UI/Cells
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/UI/ViewControllers
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Classes
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Classes/Core
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Classes/Core/Downloads
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Classes/Core/Models
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Classes/Core/Player
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Classes/Core/Settings
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Classes/Core/Utils
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Classes/Core/Welcome
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Classes/Core/MediaKit
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Classes/UI
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Classes/UI/Cells
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Classes/UI/ViewControllers
 
 # Vendor include paths
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/AFNetworking
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/FMDB
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/GCDWebServer
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/JGProgressHUD
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/Lottie
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/Others
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor/SDWebImage
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Vendor
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Vendor/AFNetworking
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Vendor/FMDB
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Vendor/GCDWebServer
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Vendor/JGProgressHUD
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Vendor/Lottie
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Vendor/Others
+uYouUnofficial_CFLAGS += -I$(UYOU_ROOT)/Vendor/SDWebImage
 
 uYouUnofficial_FRAMEWORKS = UIKit Foundation AVFoundation AVKit Photos CoreMotion VideoToolbox Security MediaPlayer
 uYouUnofficial_LIBRARIES = bz2 c++ iconv z sqlite3
