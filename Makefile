@@ -31,7 +31,6 @@ uYouUnofficial_CFLAGS = -fobjc-arc \
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/Downloads
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/Gestures
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/Models
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/Player
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/Settings
@@ -41,7 +40,6 @@ uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/Core/MediaKit
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/UI
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/UI/Cells
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/UI/ViewControllers
-uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Classes/UI/Views
 
 # Vendor include paths
 uYouUnofficial_CFLAGS += -I$(THEOS_PROJECT_DIR)/Vendor
